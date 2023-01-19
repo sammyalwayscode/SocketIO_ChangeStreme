@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "./App.css";
 import { io } from "socket.io-client";
 import axios from "axios";
 
-io("http://localhost:3040");
 const Socket = () => {
   const [userName, setUserName] = useState("");
   const [userData, setUserData] = useState([]);
+  const sockIO = io("http://localhost:3040");
 
   const createSoc = async () => {
     await axios.post("http://localhost:3040/api/create", { userName });
@@ -20,6 +19,9 @@ const Socket = () => {
 
   useEffect(() => {
     getData();
+    sockIO.on("newEntry", () => {
+      getData();
+    });
   }, []);
 
   return (
@@ -34,11 +36,13 @@ const Socket = () => {
       <button onClick={createSoc}>Create</button>
       <h2>All Socketed Users</h2>
       <div className="allCards">
-        <div className="Card">
-          <h4>Samuel</h4>
-          <button>Like</button>
-          <span>20</span>
-        </div>
+        {userData?.map((props) => (
+          <div key={props._id} className="Card">
+            <h4>{props.name}</h4>
+            <button>Like</button>
+            <span>20</span>
+          </div>
+        ))}
       </div>
     </div>
   );
